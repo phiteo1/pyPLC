@@ -39,6 +39,9 @@ class fsmEvse():
         self.state = n
         self.cyclesInState = 0
 
+    def setStepExec(self, s):
+        self.isStepExec=s
+
     def isTooLong(self):
         # The timeout handling function.
         return (self.cyclesInState > 100) # 100*33ms=3.3s
@@ -179,14 +182,22 @@ class fsmEvse():
                 self.enterState(stateWaitForFlexibleRequest) # todo: not clear, what is specified in DIN
             if (strConverterResult.find("ChargeParameterDiscoveryReq")>0):
                 self.addToTrace("Received ChargeParameterDiscoveryReq. Extracting SoC parameters via DC")
+                self.publishStatus("WriteChargeParameter...")
+                time.sleep(1)
                 jsondict = json.loads(strConverterResult)
                 current_soc = int(jsondict.get("DC_EVStatus.EVRESSSOC", -1))
                 full_soc = int(jsondict.get("FullSOC", -1))
                 energy_capacity = int(jsondict.get("EVEnergyCapacity.Value", -1))
                 energy_request = int(jsondict.get("EVEnergyRequest.Value", -1))
                 self.publishSoCs(current_soc, full_soc, energy_capacity, energy_request, origin="ChargeParameterDiscoveryReq")
-
-                # todo: check the request content, and fill response parameters
+                f= open("ChargeParameter.txt", "w")
+                for parameter in jsondict:
+                    string=parameter + " : " + jsondict[parameter] + "\n"
+                    f.write(string)
+                f.close()
+                if(self.isStepExec):
+                    sys.exit()  
+              
                 msg = addV2GTPHeader(exiEncode("EDe")) # EDe for Encode, Din, ChargeParameterDiscoveryResponse
                 if (testsuite_faultinjection_is_triggered(TC_EVSE_ResponseCode_ServiceSelectionInvalid_for_ChargeParameterDiscovery)):
                     # send a ChargeParameterDiscoveryResponse with Responsecode ServiceSelectionInvalid
@@ -393,7 +404,7 @@ class fsmEvse():
             # The TCP informs us, that a connection is established.
             self.publishStatus("TCP connected")
 
-    def __init__(self, addressManager, callbackAddToTrace, hardwareInterface, callbackShowStatus, callbackSoCStatus = None):
+    def __init__(self, addressManager, callbackAddToTrace, hardwareInterface, callbackShowStatus, callbackSoCStatus = None, isStepExec=0):
         self.callbackAddToTrace = callbackAddToTrace
         self.callbackShowStatus = callbackShowStatus
         self.callbackSoCStatus = callbackSoCStatus
@@ -410,7 +421,9 @@ class fsmEvse():
         self.rxData = []
         self.evccid = ""
         self.blChargeStopTrigger = 0
+        self.isStepExec=isStepExec
         self.nCableCheckLoops = 0
+        
 
     def mainfunction(self):
         self.Tcp.mainfunction() # call the lower-level worker

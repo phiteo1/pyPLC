@@ -66,6 +66,11 @@ if (getConfigValue("mode")=="PevMode"):
     myMode = C_PEV_MODE
 if (getConfigValue("mode")=="EvseMode"):
     myMode = C_EVSE_MODE
+
+stepExec=0
+
+if(getConfigValueBool("step_execution")):
+    stepExec= 1
 # The command line arguments overwrite the config file setting for PevMode/EvseMode.
 if (len(sys.argv) > 1):
     if (sys.argv[1] == "P"):
@@ -130,7 +135,7 @@ nKeystrokes=0
 root.bind('<Key>', storekeyname)
 cbShowStatus("initialized")
 root.update()
-worker=pyPlcWorker.pyPlcWorker(cbAddToTrace, cbShowStatus, myMode, isSimulationMode)
+worker=pyPlcWorker.pyPlcWorker(stepExec,cbAddToTrace, cbShowStatus, myMode, isSimulationMode)
 
 nMainloops=0
 while lastKey!="x":

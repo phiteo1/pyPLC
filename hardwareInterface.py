@@ -230,7 +230,7 @@ class hardwareInterface():
 
         self.loopcounter = 0
         self.outvalue = 0
-        self.simulatedSoc = 20.0 # percent
+        self.simulatedSoc = 40.0 # percent
 
         self.inletVoltage = 0.0 # volts
         self.accuVoltage = 0.0
@@ -264,7 +264,7 @@ class hardwareInterface():
         
     def resetSimulation(self):
         self.simulatedInletVoltage = 0.0 # volts
-        self.simulatedSoc = 20.0 # percent
+        self.simulatedSoc = 40.0 # percent
         
     def simulatePreCharge(self):
         if (self.simulatedInletVoltage<230):

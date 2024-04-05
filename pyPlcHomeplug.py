@@ -548,6 +548,9 @@ class pyPlcHomeplug():
             self.transmit(self.mytransmitbuffer)
             
     def transmit(self, pkt):
+        # Cosimo
+       # print("Il pacchetto e': ")
+       # print(pkt)
         self.sniffer.sendpacket(bytes(pkt))
       
     def evaluateGetKeyCnf(self):

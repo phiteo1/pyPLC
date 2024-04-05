@@ -18,7 +18,7 @@ import connMgr
 
 
 class pyPlcWorker():
-    def __init__(self, callbackAddToTrace=None, callbackShowStatus=None, mode=C_EVSE_MODE, isSimulationMode=0, callbackSoC=None):
+    def __init__(self, stepExec=0, callbackAddToTrace=None, callbackShowStatus=None, mode=C_EVSE_MODE, isSimulationMode=0, callbackSoC=None):
         print("initializing pyPlcWorker")
         self.nMainFunctionCalls=0
         self.mode = mode
@@ -29,6 +29,7 @@ class pyPlcWorker():
         self.callbackSoC = callbackSoC
         self.oldAvlnStatus = 0
         self.isSimulationMode = isSimulationMode
+        self.isStepExec=stepExec
         self.connMgr = connMgr.connMgr(self.workerAddToTrace, self.showStatus)
         self.hp = pyPlcHomeplug.pyPlcHomeplug(self.workerAddToTrace, self.showStatus, self.mode, self.addressManager, self.connMgr, self.isSimulationMode)
         self.hardwareInterface = hardwareInterface.hardwareInterface(self.workerAddToTrace, self.showStatus)
@@ -41,7 +42,7 @@ class pyPlcWorker():
             strLabel = "(unknown version. 'git describe --tags' failed.)"
         self.workerAddToTrace("[pyPlcWorker] Software version " + strLabel)
         if (self.mode == C_EVSE_MODE):
-            self.evse = fsmEvse.fsmEvse(self.addressManager, self.workerAddToTrace, self.hardwareInterface, self.showStatus, self.callbackSoC)
+            self.evse = fsmEvse.fsmEvse(self.addressManager, self.workerAddToTrace, self.hardwareInterface, self.showStatus, self.callbackSoC, self.isStepExec)
         if (self.mode == C_PEV_MODE):
             self.pev = fsmPev.fsmPev(self.addressManager, self.connMgr, self.workerAddToTrace, self.hardwareInterface, self.showStatus)
     def __del__(self):
